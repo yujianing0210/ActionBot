@@ -1,2 +1,2 @@
 # SpaceBot
-Enactive Design 24 Fall - Assign 2 
+Enactive Design 24 Fall
