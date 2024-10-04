@@ -6,6 +6,6 @@
 
 ### WebScockets Tutorials by ParametricCamp
 
-- Write WebSocket Serer and Client in Node.js
+- Write WebSocket Server and Client in Node.js
 
 ### Let's upload our codes and progress here :)
