@@ -1,6 +1,7 @@
 # SpaceBot
 
-**SCI6365 Enactive Design 24Fall**;
+**SCI6365 Enactive Design 24Fall**
+
 **Assignment[1] FooBot**
 
 ### WebScockets Tutorials by ParametricCamp
