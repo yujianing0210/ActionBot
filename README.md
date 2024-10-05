@@ -7,7 +7,12 @@
 ### WebScockets Tutorial by ParametricCamp
 
 - Write WebSocket Server and Client in Node.js
+
   <s>Host a WebSocket Server on Glitch</s>
+
+### Fun with AI Tutorial by ParametricCamp
+
+- How to Build Your Own ChatGPT Web App
 
 ### Gesture-to-Text
 
