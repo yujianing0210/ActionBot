@@ -1,12 +1,13 @@
-// Client-Side Code for Object Detection and WebSocket Communication
+// Client-Side Code for Object Detection, p5.js, and WebSocket Communication
 // Dependencies: p5.js, YOLO model for object detection
 let ws;
 let objectDetector;
 let detectedObject = '';
 let color = [255, 255, 255];
+let dia = 5;
 
 function setup() {
-    createCanvas(640, 480);
+    createCanvas(window.windowWidth, window.windowHeight);
     objectDetector = ml5.objectDetector('yolo', modelLoaded);
     ws = new WebSocket('ws://localhost:8080');
 
@@ -28,10 +29,16 @@ function setup() {
                 color = data.color;
                 break;
             case 'draw':
-                drawOnCanvas(data.x, data.y);
+                drawBall(data.x * width, data.y * height);
                 break;
         }
     };
+
+    ballColor = [random(255), random(255), random(255)];
+    bgColor = [random(255), random(255), random(255)];
+    background(bgColor);
+    fill(0);
+    text("d  r  a  w  B  O  T        v.1          click to refresh ♺", 50, 40);
 }
 
 function modelLoaded() {
@@ -55,9 +62,10 @@ function getColorFromObject(object) {
     return [random(255), random(255), random(255)];
 }
 
-function drawOnCanvas(x, y) {
+function drawBall(x, y) {
     fill(color);
-    ellipse(x * width, y * height, 20, 20);
+    noStroke();
+    ellipse(x, y, dia, dia);
 }
 
 function draw() {
@@ -67,4 +75,39 @@ function draw() {
         let y = random(0, 1); // Placeholder for actual object tracking y-coordinate
         ws.send(JSON.stringify({ type: 'draw', x: x, y: y }));
     }
+
+    if (mouseIsPressed) {
+        drawBall(mouseX, mouseY);
+        sendTargetToServer(); // Send the coordinates to the server when drawing
+    }
+}
+
+function mouseClicked() {
+    if (mouseX > 45 && mouseX < 310 && mouseY > 0 && mouseY < 55) {
+        bgColor = [random(255), random(255), random(255)];
+        background(bgColor);
+        fill(0);
+        text("d  r  a  w  B  O  T        v.1          click to refresh ♺", 50, 40);
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            let refreshMessage = JSON.stringify({ type: 'refresh', color: bgColor });
+            ws.send(refreshMessage);
+        }
+    }
+}
+
+function sendTargetToServer() {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        let norm = {
+            type: 'draw',
+            x: mouseX / width,  // Normalize the x position
+            y: mouseY / height  // Normalize the y position
+        };
+        let str = JSON.stringify(norm);
+        ws.send(str);
+        console.log("Sent position:", norm); // Log the sent position for debugging
+    }
+}
+
+function windowResized() {
+    resizeCanvas(window.windowWidth, window.windowHeight);
 }
