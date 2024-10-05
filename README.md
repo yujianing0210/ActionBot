@@ -28,4 +28,3 @@
 - Server: receive coordinates in real-time and generate sketching visuals on P5.js
 
 ### Let's upload our codes and progress here :)
-ghfhgghgghgh
