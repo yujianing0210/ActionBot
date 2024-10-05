@@ -1,0 +1,28 @@
+* {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 18px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+canvas {
+    display: block;
+}
+
+input {
+    margin-bottom: 5px;
+}
+
+#connection-status {
+    margin-left: 10px;
+}
+
+#ui-container {
+    padding: 8px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}

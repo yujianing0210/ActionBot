@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Simple Collaborative Draw</title>
+
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+</head>
+
+<body>
+    <div id="canvas-container">
+
+    </div>
+    
+    <div id="ui-container"> 
+        <div>
+            Your name: <input id="name-input" value="Anonymous">
+        </div>
+        <div>
+            Server address: <input id="server-address" value="127.0.0.1:5544">
+        </div>
+        <div>
+            <button id="connect-button">Connect</button><span id="connection-status">Disconnected</span>
+        </div>
+    </div>
+
+    <!-- Load the p5.js graphics library -->
+    <script type="text/javascript" src="lib/p5.js"></script>
+    <!-- <script type="text/javascript" src="lib/p5.min.js"></script> -->
+
+    <!-- Load the main script at the end of the page, when all the DOM elements are already present -->
+    <script type="text/javascript" src="js/script.js"></script>
+</body>
+
+</html>
