@@ -18,8 +18,13 @@
 
 - Build a chatbot web app using WebSocket where a webcam captures real-time gestures and generates feedback based on gesture recognition
 
-### GPT-to-DALLE
+### GPT-to-DALLE (tbc)
 
 - Build a web that can run GPT-3 and DALL-E in Node.js
+
+### Co-Sketching
+
+- Client: define my brush --> object detection --> object tracking --> a list of (x,y) coordinates
+- Server: receive coordinates in real-time and generate sketching visuals on P5.js
 
 ### Let's upload our codes and progress here :)
