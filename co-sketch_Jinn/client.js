@@ -35,7 +35,7 @@ function setup() {
                 break;
             case 'set_color':
                 color = data.color;
-                break;
+                break;s
             case 'draw':
                 drawBall(data.x * width, data.y * height);
                 break;
