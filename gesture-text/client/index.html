@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gesture Recognition Chatbot</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/hand-pose-detection"></script>
+</head>
+<body>
+  <h1>Gesture-Based Chatbot</h1>
+  <video id="webcam" autoplay playsinline width="640" height="480"></video>
+  <div id="feedback"></div>
+
+  <script>
+    let socket = new WebSocket('ws://localhost:5001');
+
+    // Capture webcam feed
+    const video = document.getElementById('webcam');
+
+    async function setupWebcam() {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+      video.srcObject = stream;
+    }
+
+    async function detectGestures() {
+      const model = await handPoseDetection.createDetector(handPoseDetection.SupportedModels.MediaPipeHands);
+
+      video.addEventListener('loadeddata', async () => {
+        setInterval(async () => {
+          const hands = await model.estimateHands(video);
+          if (hands.length > 0) {
+            const gesture = interpretGestures(hands);
+            socket.send(gesture);  // Send recognized gesture to the server
+          }
+        }, 100);
+      });
+    }
+
+    function interpretGestures(hands) {
+      // Example: Simple gesture interpretation logic
+      const thumb = hands[0].keypoints[4];  // Thumb position
+      const index = hands[0].keypoints[8];  // Index finger position
+
+      if (thumb.y < index.y) {
+        return 'thumbs up';
+      }
+      return 'wave';  // Default gesture
+    }
+
+    socket.onmessage = (event) => {
+      document.getElementById('feedback').innerText = event.data;
+    };
+
+    setupWebcam();
+    detectGestures();
+  </script>
+</body>
+</html>
