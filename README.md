@@ -10,6 +10,10 @@
 
   <s>Host a WebSocket Server on Glitch</s>
 
+### Fun with AI Tutorial by ParametricCamp
+
+- How to Build Your Own ChatGPT Web App
+
 ### Gesture-to-Text
 
 - Build a chatbot web app using WebSocket where a webcam captures real-time gestures and generates feedback based on gesture recognition
