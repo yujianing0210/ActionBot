@@ -20,8 +20,7 @@ body {
     position: relative;
 }
 
-video,
-canvas {
+video, canvas {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -31,6 +30,42 @@ canvas {
 canvas {
     pointer-events: none;
     /* Makes sure canvas doesn't block video interactions */
+}
+
+#button-container {
+    position: absolute;
+    bottom: 20px; /* Distance from the bottom of the viewport */
+    gap: 10px; /* Space between buttons */
+    display: flex; /* Align buttons horizontally */
+    left: 50%; /* Centering */
+    transform: translateX(-50%); /* Adjusting centering */
+    z-index: 10; /* Ensure it is above other elements */
+}
+
+button {
+    border: none; /* Remove default border */
+    border-radius: 12px; /* Rounded corners */
+    padding: 10px 20px; /* Padding for buttons */
+    font-size: 16px; /* Font size */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.3s; /* Transition for hover effects */
+}
+
+#finish-btn {
+    background-color: red; /* Finish button color */
+    color: white; /* Text color */
+}
+#finish-btn:hover {
+    background-color: darkred; /* Darker red on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+#save-btn {
+    background-color: green; /* Save button color */
+    color: white; /* Text color */
+}
+#save-btn:hover {
+    background-color: darkgreen; /* Darker green on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
 }
 
 h1 {

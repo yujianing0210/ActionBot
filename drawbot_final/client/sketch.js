@@ -10,22 +10,24 @@ let previousY = null;
 let objectX = 0;
 let objectY = 0;
 let hueValue = 0;
+
 let scale = 1.5;
+
 let noiseOffset = 0;
-let textureImg; // To hold texture image
 let particles = [];
+let isFinished = false; // Track if drawing is finished
 
 // List of allowed objects to be used as a brush : https://gist.github.com/AruniRC/7b3dadd004da04c80198557db5da4bda 
 // far-distance sketch
-// const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
+const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
 // close distance sketch
-const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'cup', 'fork', 'mouse',  'scissors', 'toothbrush'];
+// const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'cup', 'fork', 'mouse',  'scissors', 'toothbrush'];
 
 function setup() {
-  
     let canvasWidth = 640 * scale;
     let canvasHeight = 480 * scale;
-    // Create the canvas and center it with transparent background
+
+    // Create the canvas and center it with a transparent background
     createCanvas(canvasWidth, canvasHeight).position(windowWidth / 2, windowHeight / 2);
     clear(); // Make the canvas transparent by clearing its background
 
@@ -38,7 +40,6 @@ function setup() {
     video.style('z-index', '-1'); // Ensure the video is behind the canvas
 
     video.elt.addEventListener('loadeddata', () => {
-        // Handle client disconnection
         window.addEventListener('beforeunload', () => {
             if (serverConnection.readyState === WebSocket.OPEN) {
                 serverConnection.send(JSON.stringify({ type: 'disconnection', message: 'Client disconnected' }));
@@ -54,7 +55,6 @@ function setup() {
     // WebSocket event listeners
     serverConnection.onopen = () => {
         console.log('Connected to the server');
-        // Send a message to the server when a client is connected
         serverConnection.send(JSON.stringify({ type: 'connection', message: 'Client connected' }));
     };
 
@@ -64,6 +64,11 @@ function setup() {
             drawShape(data.x * width, data.y * height, data.color);
         }
     };
+
+    // // Add event listeners for the finish and save buttons
+    // document.getElementById('finishBtn').addEventListener('click', finishDrawing);
+    // document.getElementById('saveBtn').addEventListener('click', saveDrawing);
+    
 }
 
 function modelLoaded() {
@@ -72,6 +77,7 @@ function modelLoaded() {
 }
 
 function detectObjects() {
+    if (isFinished) return; // Don't detect objects if finished
     objectDetector.detect(video, (err, results) => {
         if (err) {
             console.error(err);
@@ -104,7 +110,7 @@ function generateRandomColors() {
 }
 
 function draw() {
-    if (drawReady && objectTracking) {
+    if (drawReady && objectTracking && !isFinished) {
         objectDetector.detect(video, (err, results) => {
             if (err) {
                 console.error(err);
@@ -255,6 +261,31 @@ function drawParticleBrush(x, y) {
         }
     }
 }
+
+function saveDrawing() {
+    saveCanvas('myDrawing', 'png'); // Save the canvas as a PNG
+}
+
+function finishDrawing() {
+    video.stop();    // Stop the video and change the canvas background color to white
+    // background(255); // Change canvas to white
+    // video.remove(); // Remove video element
+    // isFinished = true; // Set finished state
+    // drawReady = false; // Disable drawing
+    // objectTracking = false; // Stop object tracking
+}
+
+function windowLoaded() {
+    // Add event listeners for buttons
+    document.getElementById('save-btn').addEventListener('click', saveDrawing);
+    document.getElementById('finish-btn').addEventListener('click', finishDrawing);
+}
+
+// Call setup when the window is fully loaded
+window.onload = () => {
+    setup();
+    windowLoaded();
+};
 
 function windowResized() {
     let canvasWidth = 640 * scale;
