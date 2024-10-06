@@ -19,9 +19,9 @@ let isFinished = false; // Track if drawing is finished
 
 // List of allowed objects to be used as a brush : https://gist.github.com/AruniRC/7b3dadd004da04c80198557db5da4bda 
 // far-distance sketch
-// const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
+const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
 // close distance sketch
-const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'cup', 'fork', 'mouse',  'scissors', 'toothbrush'];
+// const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'cup', 'fork', 'mouse',  'scissors', 'toothbrush'];
 
 function setup() {
     let canvasWidth = 640 * scale;
@@ -50,7 +50,7 @@ function setup() {
     });
 
     // Start the WebSocket connection to the server
-    serverConnection = new WebSocket('wss://puzzle-actually-kettle.glitch.me/');
+    serverConnection = new WebSocket('wss://night-tricky-valley.glitch.me/'); // wss://night-tricky-valley.glitch.me/
 
     // WebSocket event listeners
     serverConnection.onopen = () => {
