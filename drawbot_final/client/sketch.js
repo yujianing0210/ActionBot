@@ -50,7 +50,7 @@ function setup() {
     });
 
     // Start the WebSocket connection to the server
-    serverConnection = new WebSocket('wss://night-tricky-valley.glitch.me/'); // wss://night-tricky-valley.glitch.me/
+    serverConnection = new WebSocket('wss://puzzle-actually-kettle.glitch.me/'); // https://night-tricky-valley.glitch.me/
 
     // WebSocket event listeners
     serverConnection.onopen = () => {
