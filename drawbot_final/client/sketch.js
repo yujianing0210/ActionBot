@@ -15,7 +15,7 @@ let noiseOffset = 0;
 let textureImg; // To hold texture image
 let particles = [];
 
-// List of allowed objects to be used as a brush
+// List of allowed objects to be used as a brush : https://gist.github.com/AruniRC/7b3dadd004da04c80198557db5da4bda 
 // far-distance sketch
 // const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
 // close distance sketch
