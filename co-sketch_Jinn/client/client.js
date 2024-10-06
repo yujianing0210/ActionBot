@@ -249,8 +249,12 @@
 // }
 
 
-// Revised Client-Side Code for Object Detection, p5.js, and WebSocket Communication
-// Dependencies: p5.js, YOLO model for object detection
+
+
+
+
+// // Revised Client-Side Code for Object Detection, p5.js, and WebSocket Communication
+// // Dependencies: p5.js, YOLO model for object detection
 let ws;
 let objectDetector;
 let detectedObject = '';
@@ -258,8 +262,8 @@ let color = [255, 255, 255];
 let dia = 20;
 let video;
 let isDrawingStage = false;
-let objectX = 0.5;
-let objectY = 0.5;
+let objectX = 1;
+let objectY = 1;
 
 function setup() {
     // Create p5.js canvas
@@ -289,13 +293,17 @@ function setup() {
         const data = JSON.parse(event.data);
         switch (data.type) {
             case 'draw':
-                drawBall(data.x * width, data.y * height, data.color);
+                // Scale the received normalized (x, y) back to canvas size
+                let scaledX = data.x * width;
+                let scaledY = data.y * height;
+                drawBall(scaledX, scaledY, data.color);
                 break;
             case 'refresh':
                 background(data.color);
                 break;
         }
     };
+
 
     // Load YOLO model for object detection
     objectDetector = ml5.objectDetector('yolo', modelLoaded);
