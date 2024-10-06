@@ -49,7 +49,7 @@ function setup() {
 
     // Start the WebSocket connection to the server
     // serverConnection = new WebSocket('ws://localhost:3000');
-    serverConnection = new WebSocket('ws://100.86.216.25:3000');
+    serverConnection = new WebSocket('wss://puzzle-actually-kettle.glitch.me/');
 
     // WebSocket event listeners
     // serverConnection.onopen = () => {
