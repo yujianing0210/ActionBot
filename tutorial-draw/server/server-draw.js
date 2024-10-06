@@ -2,7 +2,7 @@
 // bounces incoming messages around between clients. 
 
 // Load WS module
-const WebSocket = require('ws');
+const WebSocket = require('./node_modules/ws');
 
 // Set up the server
 const PORT = 5544;
