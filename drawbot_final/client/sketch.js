@@ -1,4 +1,3 @@
-// Modified sketch.js
 let video;
 let serverConnection;
 let drawReady = false;
@@ -6,15 +5,17 @@ let brushColor;
 let detectedObject = '';
 let objectDetector;
 let objectTracking = false;
+let previousX = null;
+let previousY = null;
 let objectX = 0;
 let objectY = 0;
+let hueValue = 0;
+let depthModel;
 
 // List of allowed objects to be used as a brush
-const allowedObjects = ['apple', 'peach', 'banana', 'bottle', 'cup'];
+const allowedObjects = ['apple', 'orange', 'banana', 'carrot', 'bottle', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'mouse', 'remote', 'book', 'scissors', 'toothbrush'];
 
 function setup() {
-    // Set dark background color for the browser
-    document.body.style.backgroundColor = '#222';
     // Set both canvas and video to be square
     let canvasWidth = 640;
     let canvasHeight = 480;
@@ -24,17 +25,6 @@ function setup() {
     video.style('transform', 'scaleX(-1)');
 
     video.position((windowWidth / 4) - (video.width / 2), (windowHeight / 2) - (video.height / 2));
-
-    // // Draw bounding boxes for canvas and video
-    // let canvasBoundingBox = createDiv();
-    // canvasBoundingBox.style('border', '2px solid red');
-    // canvasBoundingBox.size(canvasWidth, canvasHeight);
-    // canvasBoundingBox.position((windowWidth * 3 / 4) - (canvasWidth / 2), (windowHeight / 2) - (canvasHeight / 2));
-
-    // let videoBoundingBox = createDiv();
-    // videoBoundingBox.style('border', '2px solid blue');
-    // videoBoundingBox.size(video.width, video.height);
-    // videoBoundingBox.position((windowWidth / 4) - (video.width / 2), (windowHeight / 2) - (video.height / 2));
 
     video.elt.addEventListener('loadeddata', () => {
         // Handle client disconnection
@@ -48,38 +38,35 @@ function setup() {
     });
 
     // Start the WebSocket connection to the server
-    // serverConnection = new WebSocket('ws://localhost:3000');
     serverConnection = new WebSocket('wss://puzzle-actually-kettle.glitch.me/');
 
     // WebSocket event listeners
-    // serverConnection.onopen = () => {
-    //     console.log('Connected to the server');
-    //     // Send a message to the server when a client is connected
-    //     serverConnection.send(JSON.stringify({ type: 'connection', message: 'Client connected' }));
-    // };
     serverConnection.onopen = () => {
         console.log('Connected to the server');
-        // Assign a random brush color to this client
-        brushColor = [random(100, 255), random(100, 255), random(100, 255)];
         // Send a message to the server when a client is connected
         serverConnection.send(JSON.stringify({ type: 'connection', message: 'Client connected' }));
     };
 
-
-    // serverConnection.onmessage = (event) => {
-    //     let data = JSON.parse(event.data);
-    //     if (data.type === 'draw') {
-    //         drawBall((1 - data.x) * width, data.y * height, data.color);
-    //     }
-    // };
     serverConnection.onmessage = (event) => {
         let data = JSON.parse(event.data);
         if (data.type === 'draw') {
-            // Use consistent brush color per client, perhaps identified by an ID
-            drawBall((data.x) * width, data.y * height, data.color);
+            drawShape((data.x) * width, data.y * height, data.z); // Pass `z` to adjust thickness
         }
     };
 
+    loadDepthModel();
+}
+
+async function loadDepthModel() {
+    // Load the pre-trained MiDaS model for depth estimation
+    depthModel = await midas.load();
+    console.log('Depth model loaded');
+}
+
+async function getDepth(videoElement) {
+    // Use the depth model to estimate depth from the video element
+    const predictions = await depthModel.estimateDepth(videoElement);
+    return predictions; // Depth information for each pixel
 }
 
 function modelLoaded() {
@@ -108,19 +95,17 @@ function detectObjects() {
                 detectObjects();
             }
         } else {
-            setTimeout(detectObjects, 20);
+            setTimeout(detectObjects, 10);
         }
     });
 }
 
 function draw() {
     // Keep canvas background white, retain previous drawings
-    if (!drawReady) background(255);
-    // Draw the mirrored video feed
+    if (!drawReady) background(249, 244, 249); // RGB equivalent of #d1ced9
 
     if (drawReady && objectTracking) {
-        // Object tracking using YOLO results
-        objectDetector.detect(video, (err, results) => {
+        objectDetector.detect(video, async (err, results) => {
             if (err) {
                 console.error(err);
                 return;
@@ -130,32 +115,34 @@ function draw() {
             let allowedResult = results.find(result => allowedObjects.includes(result.label.toLowerCase()));
 
             if (allowedResult) {
-                // Correct the object coordinates to match the canvas scale
+                // Detect depth
+                let depthMap = await getDepth(video.elt); // Get depth map for video frame
+                let objectDepth = depthMap[allowedResult.y][allowedResult.x]; // Get the depth for the detected object
+
                 let videoWidth = video.width;
                 let videoHeight = video.height;
                 objectX = width - ((allowedResult.x + allowedResult.width / 2) * (width / videoWidth));
                 objectY = (allowedResult.y + allowedResult.height / 2) * (height / videoHeight);
+
+                // Use objectDepth (z) to control the brushstroke thickness
+                let thickness = map(objectDepth, 0, 1, 1, 10); // Adjust the range as needed
+                strokeWeight(thickness);
+
                 if (!brushColor) brushColor = [random(100, 255), random(100, 255), random(100, 255)];
-                drawBall(objectX, objectY, brushColor);
+                if (previousX !== null && previousY !== null) {
+                    stroke(brushColor);
+                    line(previousX, previousY, objectX, objectY);
+                }
+                previousX = objectX;
+                previousY = objectY;
 
-                // Draw bounding box around detected object
-                // let objectBoundingBox = createDiv();
-                // objectBoundingBox.style('border', '2px dashed green');
-                // objectBoundingBox.position((windowWidth / 4) - (video.width / 2) + (640 - (allowedResult.x + allowedResult.width)) * (640 / videoWidth), (windowHeight / 2) - (video.height / 2) + (allowedResult.y * (480 / videoHeight)));
-                // objectBoundingBox.size(allowedResult.width * (640 / videoWidth), allowedResult.height * (480 / videoHeight));
-
-                // Display object center coordinates
-                // fill(0);
-                // textSize(16);
-                // textAlign(CENTER, CENTER);
-                // text(`(${Math.round(objectX)}, ${Math.round(objectY)})`, objectX, objectY - 15);
-
-                // Send the current drawing coordinates and color to the server
+                // Send the current drawing coordinates, color, and depth to the server
                 if (serverConnection.readyState === WebSocket.OPEN) {
                     serverConnection.send(JSON.stringify({
                         type: 'draw',
                         x: objectX / width,
                         y: objectY / height,
+                        z: objectDepth, // Send depth information
                         color: brushColor
                     }));
                 }
@@ -164,10 +151,24 @@ function draw() {
     }
 }
 
-function drawBall(x, y, color) {
-    fill(color);
+function drawShape(x, y, z) {
+    colorMode(HSB, 360, 100, 100);
+    hueValue = (hueValue + 1) % 360; // Increment hue value and keep it within the HSB range
+    fill(hueValue, 100, 100);
+
+    // Set the thickness based on the depth (z) value
+    let thickness = map(z, 0, 1, 5, 20); // Adjust the range as needed (closer = larger, farther = smaller)
+
     noStroke();
-    ellipse(x, y, 10, 10);
+    beginShape();
+    for (let i = 0; i < 10; i++) {
+        let angle = TWO_PI / 10 * i;
+        let radius = thickness + sin(frameCount * 0.1 + i) * 5; // Use `thickness` as the base size
+        let sx = x + cos(angle) * radius;
+        let sy = y + sin(angle) * radius;
+        vertex(sx, sy);
+    }
+    endShape(CLOSE);
 }
 
 function windowResized() {

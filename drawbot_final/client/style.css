@@ -1,0 +1,141 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Pacifico&display=swap");
+@import url("https://fonts.cdnfonts.com/css/proclamate");
+@import url("https://fonts.googleapis.com/css2?family=Love+Ya+Like+A+Sister&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Satisfy&display=swap");
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    width: 100%;
+    background: #d1ced9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+h1 {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "Poppins", sans-serif;
+    font-size: 2vw;
+    letter-spacing: -0.3rem;
+    z-index: 1;
+    text-align: center;
+
+}
+
+@media (max-width: 1400px) {
+    h1 {
+        font-size: 5vw;
+    }
+}
+
+h1 span {
+    margin: 0 auto;
+    margin-left: 0.3em;
+    display: inline-block;
+    position: relative;
+}
+
+h1 span:before {
+    content: "";
+    position: absolute;
+    top: -0.2em;
+    left: -0.2em;
+    width: 100%;
+    height: 100%;
+    padding: 0.2em;
+    z-index: -1;
+}
+
+h1 span:nth-child(1) {
+    font-family: "Proclamate Light", sans-serif;
+    text-transform: lowercase;
+    color: #ffc863;
+}
+
+h1 span:nth-child(1)::before {
+    background: #332929;
+    clip-path: polygon(0 0, 100% 0%, 100% 100%, 0 83%);
+}
+
+h1 span:nth-child(2) {
+    font-style: italic;
+    font-family: "Playfaslay", serif;
+    color: #023020;
+    text-shadow: 0.02em 0.02em 0 #a52a2a, 0.03em 0.03em 0 #a52a2a;
+}
+
+h1 span:nth-child(2)::before {
+    background: #f5deb3;
+}
+
+h1 span:nth-child(3) {
+    font-family: "Satisfy", cursive;
+    font-weight: 400;
+    font-style: normal;
+    color: #28282B;
+}
+
+h1 span:nth-child(3)::before {
+    background: #a52a2a;
+    clip-path: polygon(20% 0%, 99% 0, 100% 100%, 0% 100%);
+}
+
+h1 span:nth-child(4) {
+    font-family: "Love Ya Like A Sister", cursive;
+    color: #22232e;
+}
+
+h1 span:nth-child(4)::before {
+    background-image: radial-gradient(rgba(0, 194, 203, 0.7) 3px, transparent 3px);
+    background-color: #e0ffff;
+    background-size: 10px 10px;
+    clip-path: polygon(20% 0%, 99% 0, 100% 100%, 0% 100%);
+}
+
+h1 span:nth-child(5) {
+    font-family: "Poppins", serif;
+    color: #00c2cb;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-stroke: 0.07em rgba(237, 10, 139, 0.7);
+}
+
+h1 span:nth-child(5)::before {
+    background: rgba(0, 194, 203, 0.7);
+    clip-path: polygon(0 24%, 100% 20%, 100% 86%, 0 82%);
+}
+
+h1 span:nth-child(6) {
+    font-family: "Pacifico", cursive;
+    color: #ff6347;
+    text-shadow: 0.02em 0.02em 0 #ff4500, 0.03em 0.03em 0 #ff4500;
+}
+
+h1 span:nth-child(6)::before {
+    background: #ffe4b5;
+    clip-path: polygon(10% 0%, 90% 0, 100% 100%, 0% 100%);
+}
+
+h1 span:nth-child(7) {
+    font-family: "Poppins", sans-serif;
+    font-weight: 700;
+    color: #8b008b;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-stroke: 0.05em rgba(0, 0, 0, 0.5);
+}
+
+h1 span:nth-child(7)::before {
+    background: #dda0dd;
+    clip-path: polygon(15% 0%, 85% 0, 100% 90%, 0% 85%);
+}
