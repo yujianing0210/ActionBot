@@ -19,9 +19,9 @@ let isFinished = false; // Track if drawing is finished
 
 // List of allowed objects to be used as a brush : https://gist.github.com/AruniRC/7b3dadd004da04c80198557db5da4bda 
 // far-distance sketch
-const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
+// const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
 // close distance sketch
-// const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'cup', 'fork', 'mouse',  'scissors', 'toothbrush'];
+const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'cup', 'fork', 'mouse',  'scissors', 'toothbrush'];
 
 function setup() {
     let canvasWidth = 640 * scale;
@@ -55,20 +55,17 @@ function setup() {
     // WebSocket event listeners
     serverConnection.onopen = () => {
         console.log('Connected to the server');
+        brushColor = [random(100, 255), random(100, 255), random(100, 255)];
         serverConnection.send(JSON.stringify({ type: 'connection', message: 'Client connected' }));
     };
 
     serverConnection.onmessage = (event) => {
         let data = JSON.parse(event.data);
         if (data.type === 'draw') {
-            drawShape(data.x * width, data.y * height, data.color);
+            // drawShape(data.x * width, data.y * height, data.color);
+            drawParticleBrush(data.x * width, data.y * height, data.color);
         }
     };
-
-    // // Add event listeners for the finish and save buttons
-    // document.getElementById('finishBtn').addEventListener('click', finishDrawing);
-    // document.getElementById('saveBtn').addEventListener('click', saveDrawing);
-    
 }
 
 function modelLoaded() {
@@ -98,7 +95,7 @@ function detectObjects() {
                 detectObjects();
             }
         } else {
-            setTimeout(detectObjects, 10);
+            setTimeout(detectObjects, 1);
         }
     });
 }
@@ -125,45 +122,57 @@ function draw() {
                 let videoWidth = 640;
                 let videoHeight = 480;
                 let currentX = width - ((allowedResult.x + allowedResult.width / 2) * (width / videoWidth)) * scale;
-                let currentY = (allowedResult.y + allowedResult.height / 5) * (height / videoHeight) * scale;
+                let currentY = (allowedResult.y + allowedResult.height / 2) * (height / videoHeight) * scale;
                 
                 // Generate new brush color if not defined
                 if (!brushColor) {
                     brushColor = [random(100, 255), random(100, 255), random(100, 255)];
                 }
 
+                drawParticleBrush(currentX, currentY, brushColor);
+
                 // Ensure previous position exists before interpolation
-                if (previousX !== null && previousY !== null) {
-                    let steps = 10; // Number of transition steps
-                    for (let i = 0; i <= steps; i++) {
-                        // Interpolating the position between previous and current
-                        let interX = lerp(previousX, currentX, i / steps);
-                        let interY = lerp(previousY, currentY, i / steps);
+                // if (previousX !== null && previousY !== null) {
+                //     let steps = 5; // Number of transition steps
+                //     for (let i = 0; i <= steps; i++) {
+                //         // Interpolating the position between previous and current
+                //         let interX = lerp(previousX, currentX, i / steps);
+                //         let interY = lerp(previousY, currentY, i / steps);
 
-                        // Interpolating the color
-                        let interColor = [
-                            lerp(brushColor[0], random(100, 255), i / steps),
-                            lerp(brushColor[1], random(100, 255), i / steps),
-                            lerp(brushColor[2], random(100, 255), i / steps)
-                        ];
+                //         // Interpolating the color
+                //         let interColor = [
+                //             lerp(brushColor[0], random(100, 255), i / steps),
+                //             lerp(brushColor[1], random(100, 255), i / steps),
+                //             lerp(brushColor[2], random(100, 255), i / steps)
+                //         ];
 
-                        // Draw transition shape at the interpolated position with the interpolated color
-                        // drawTransitionShapeBrush(interX, interY, interColor, i, steps);
+                //         // Draw transition shape at the interpolated position with the interpolated color
+                //         // drawTransitionShapeBrush(interX, interY, interColor, i, steps);
 
-                        // drawSmudgeBrush(interX, interY, interColor, i, steps);
+                //         // drawSmudgeBrush(interX, interY, interColor, i, steps);
 
-                        // drawFluidBrush(interX, interY);
+                //         // drawFluidBrush(interX, interY);
 
-                        // let [color1, color2] = generateRandomColors();
-                        // drawGradientStroke(previousX, previousY, currentX, currentY, color1, color2);
+                //         // let [color1, color2] = generateRandomColors();
+                //         // drawGradientStroke(previousX, previousY, currentX, currentY, color1, color2);
 
-                        drawParticleBrush(interX, interY);
-                    }
-                }
+                //         drawParticleBrush(interX, interY);
+                //     }
+                // }
 
                 // Update previous position and color
-                previousX = currentX;
-                previousY = currentY;
+                // previousX = currentX;
+                // previousY = currentY;
+
+                // Send the current drawing coordinates and color to the server
+                if (serverConnection.readyState === WebSocket.OPEN) {
+                    serverConnection.send(JSON.stringify({
+                        type: 'draw',
+                        x: objectX / width,
+                        y: objectY / height,
+                        color: brushColor
+                    }));
+                }
             }
         });
     }
@@ -229,11 +238,12 @@ function drawGradientStroke(x1, y1, x2, y2, color1, color2) {
 }
 
 // Particle System Brush Strokes
-function Particle(x, y) {
+function Particle(x, y, color) {
     this.x = x;
     this.y = y;
     this.size = random(5, 15);
     this.alpha = 255;
+    this.color = color;
 
     this.update = function() {
         this.y += random(-1, 1); // Small random movement
@@ -242,17 +252,19 @@ function Particle(x, y) {
     }
 
     this.display = function() {
-        fill(45, this.alpha);
+        fill(this.color[0], this.color[1], this.color[2], this.alpha);
         noStroke();
         ellipse(this.x, this.y, this.size);
     }
 }
 
-function drawParticleBrush(x, y) {
+function drawParticleBrush(x, y, color) {
+    // Emit multiple particles with the given color
     for (let i = 0; i < 10; i++) { // Emit multiple particles
-        particles.push(new Particle(x, y));
+        particles.push(new Particle(x, y, color));
     }
 
+    // Update and display all particles
     for (let i = particles.length - 1; i >= 0; i--) {
         particles[i].update();
         particles[i].display();
@@ -269,10 +281,6 @@ function saveDrawing() {
 function finishDrawing() {
     video.stop();    // Stop the video and change the canvas background color to white
     // background(255); // Change canvas to white
-    // video.remove(); // Remove video element
-    // isFinished = true; // Set finished state
-    // drawReady = false; // Disable drawing
-    // objectTracking = false; // Stop object tracking
 }
 
 function windowLoaded() {
