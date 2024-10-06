@@ -60,14 +60,15 @@ function setup() {
 
 async function loadDepthModel() {
     // Load the pre-trained MiDaS model for depth estimation
-    depthModel = await midas.load();
+    depthModel = await tf.loadGraphModel('https://tfhub.dev/intel/midas/v2_1_small/1/default/1', { fromTFHub: true });
     console.log('Depth model loaded');
 }
 
 async function getDepth(videoElement) {
     // Use the depth model to estimate depth from the video element
-    const predictions = await depthModel.estimateDepth(videoElement);
-    return predictions; // Depth information for each pixel
+    const depthTensor = await depthModel.executeAsync(videoElement);
+    const depthData = await depthTensor.data(); // Convert tensor to array data
+    return depthData; // Depth information for each pixel
 }
 
 function modelLoaded() {
@@ -136,6 +137,12 @@ function draw() {
                 }
                 previousX = objectX;
                 previousY = objectY;
+
+                // Display object center coordinates
+                fill(0);
+                textSize(16);
+                textAlign(CENTER, CENTER);
+                text(`(${Math.round(objectX)}, ${Math.round(objectY)})`, objectX, objectY - 15);
 
                 // Send the current drawing coordinates, color, and depth to the server
                 if (serverConnection.readyState === WebSocket.OPEN) {
