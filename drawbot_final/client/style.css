@@ -20,7 +20,8 @@ body {
     position: relative;
 }
 
-video, canvas {
+video,
+canvas {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -28,7 +29,8 @@ video, canvas {
 }
 
 canvas {
-    pointer-events: none; /* Makes sure canvas doesn't block video interactions */
+    pointer-events: none;
+    /* Makes sure canvas doesn't block video interactions */
 }
 
 h1 {
@@ -150,4 +152,27 @@ h1 span:nth-child(7) {
 h1 span:nth-child(7)::before {
     background: #dda0dd;
     clip-path: polygon(15% 0%, 85% 0, 100% 90%, 0% 85%);
+}
+
+h1 span:nth-child(8) {
+    font-family: "Love Ya Like A Sister", cursive;
+    color: #ff4500;
+    text-shadow: 0.03em 0.03em 0 #ff6347, 0.05em 0.05em 0 #ff6347;
+}
+
+h1 span:nth-child(8)::before {
+    background: #ffe4e1;
+    clip-path: polygon(5% 0, 95% 0, 100% 100%, 0% 100%);
+}
+
+h1 span:nth-child(9) {
+    font-family: "Pacifico", cursive;
+    font-weight: 600;
+    color: #228b22;
+    text-shadow: 0.02em 0.02em 0 #006400, 0.03em 0.03em 0 #006400;
+}
+
+h1 span:nth-child(9)::before {
+    background: #98fb98;
+    clip-path: polygon(10% 10%, 90% 0, 100% 90%, 0% 100%);
 }
