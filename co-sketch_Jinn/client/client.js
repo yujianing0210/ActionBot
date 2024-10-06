@@ -258,21 +258,24 @@ let color = [255, 255, 255];
 let dia = 5;
 let video;
 let isDrawingStage = false;
+let objectX = 0.5;
+let objectY = 0.5;
 
 function setup() {
     // Create p5.js canvas
-    createCanvas(windowWidth, windowHeight);
-    background(255, 255, 255, 0); // Set transparent background
+    let canvas = createCanvas(windowWidth, windowHeight);
+    canvas.position(0, 0);
+    canvas.style('z-index', '1'); // Ensure canvas is above the video
+    clear(); // Set transparent background
     fill(0);
     textSize(20);
     text("d  r  a  w  B  O  T        v.1          click to refresh ♺", 50, 40);
 
     // Create video capture for live stream
     video = createCapture(VIDEO);
-    video.size(width, height);
+    video.size(windowWidth, windowHeight);
     video.position(0, 0);
     video.style('z-index', '-1'); // Place video under p5.js canvas
-    video.hide();
 
     // Initialize WebSocket
     ws = new WebSocket('ws://localhost:8080');
@@ -317,6 +320,7 @@ function detectObject() {
                         // Show the drawing stage message for 5 seconds
                         alert('Now draw with your ' + detectedObject + ' with your friends');
                     }, 5000);
+                    trackObject();
                 } else {
                     alert('Resetting... You can reselect an object as your paintbrush. Please show an object to the camera');
                     detectObject();
@@ -334,6 +338,23 @@ function getColorFromObject(object) {
     return [random(255), random(255), random(255)];
 }
 
+function trackObject() {
+    setInterval(() => {
+        if (isDrawingStage) {
+            objectDetector.detect(video, function (err, results) {
+                if (results.length > 0) {
+                    // Update the coordinates of the detected object
+                    objectX = results[0].x + results[0].width / 2;
+                    objectY = results[0].y + results[0].height / 2;
+                    // Normalize the coordinates to be between 0 and 1
+                    objectX = objectX / video.width;
+                    objectY = objectY / video.height;
+                }
+            });
+        }
+    }, 100); // Update object tracking every 0.1 seconds
+}
+
 function drawBall(x, y, color) {
     fill(color);
     noStroke();
@@ -342,10 +363,10 @@ function drawBall(x, y, color) {
 
 function draw() {
     if (isDrawingStage) {
-        image(video, 0, 0, width, height);
-        let x = random(0, 1); // Placeholder for actual object tracking x-coordinate
-        let y = random(0, 1); // Placeholder for actual object tracking y-coordinate
-        ws.send(JSON.stringify({ type: 'draw', x: x, y: y, color: color }));
+        // Drawing logic during the drawing stage using tracked object coordinates
+        clear();
+        ws.send(JSON.stringify({ type: 'draw', x: objectX, y: objectY, color: color }));
+        drawBall(objectX * width, objectY * height, color);
     }
 }
 
@@ -378,5 +399,5 @@ function sendTargetToServer() {
 
 function windowResized() {
     resizeCanvas(windowWidth, windowHeight);
-    video.size(width, height);
+    video.size(windowWidth, windowHeight);
 }
