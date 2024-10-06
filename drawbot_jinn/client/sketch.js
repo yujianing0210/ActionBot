@@ -10,7 +10,7 @@ let objectX = 0;
 let objectY = 0;
 
 // List of allowed objects to be used as a brush
-const allowedObjects = ['apple', 'peach', 'banana', 'bottle', 'cup', 'pen', 'notebook', 'watch'];
+const allowedObjects = ['apple', 'peach', 'banana', 'bottle', 'cup'];
 
 function setup() {
     // Set dark background color for the browser
@@ -25,16 +25,16 @@ function setup() {
 
     video.position((windowWidth / 4) - (video.width / 2), (windowHeight / 2) - (video.height / 2));
 
-    // Draw bounding boxes for canvas and video
-    let canvasBoundingBox = createDiv();
-    canvasBoundingBox.style('border', '2px solid red');
-    canvasBoundingBox.size(canvasWidth, canvasHeight);
-    canvasBoundingBox.position((windowWidth * 3 / 4) - (canvasWidth / 2), (windowHeight / 2) - (canvasHeight / 2));
+    // // Draw bounding boxes for canvas and video
+    // let canvasBoundingBox = createDiv();
+    // canvasBoundingBox.style('border', '2px solid red');
+    // canvasBoundingBox.size(canvasWidth, canvasHeight);
+    // canvasBoundingBox.position((windowWidth * 3 / 4) - (canvasWidth / 2), (windowHeight / 2) - (canvasHeight / 2));
 
-    let videoBoundingBox = createDiv();
-    videoBoundingBox.style('border', '2px solid blue');
-    videoBoundingBox.size(video.width, video.height);
-    videoBoundingBox.position((windowWidth / 4) - (video.width / 2), (windowHeight / 2) - (video.height / 2));
+    // let videoBoundingBox = createDiv();
+    // videoBoundingBox.style('border', '2px solid blue');
+    // videoBoundingBox.size(video.width, video.height);
+    // videoBoundingBox.position((windowWidth / 4) - (video.width / 2), (windowHeight / 2) - (video.height / 2));
 
     video.elt.addEventListener('loadeddata', () => {
         // Handle client disconnection
@@ -76,7 +76,7 @@ function setup() {
         let data = JSON.parse(event.data);
         if (data.type === 'draw') {
             // Use consistent brush color per client, perhaps identified by an ID
-            drawBall((1 - data.x) * width, data.y * height, data.color);
+            drawBall((data.x) * width, data.y * height, data.color);
         }
     };
 
@@ -108,7 +108,7 @@ function detectObjects() {
                 detectObjects();
             }
         } else {
-            setTimeout(detectObjects, 500);
+            setTimeout(detectObjects, 100);
         }
     });
 }
@@ -139,10 +139,10 @@ function draw() {
                 drawBall(objectX, objectY, brushColor);
 
                 // Draw bounding box around detected object
-                let objectBoundingBox = createDiv();
-                objectBoundingBox.style('border', '2px dashed green');
-                objectBoundingBox.position((windowWidth / 4) - (video.width / 2) + (640 - (allowedResult.x + allowedResult.width)) * (640 / videoWidth), (windowHeight / 2) - (video.height / 2) + (allowedResult.y * (480 / videoHeight)));
-                objectBoundingBox.size(allowedResult.width * (640 / videoWidth), allowedResult.height * (480 / videoHeight));
+                // let objectBoundingBox = createDiv();
+                // objectBoundingBox.style('border', '2px dashed green');
+                // objectBoundingBox.position((windowWidth / 4) - (video.width / 2) + (640 - (allowedResult.x + allowedResult.width)) * (640 / videoWidth), (windowHeight / 2) - (video.height / 2) + (allowedResult.y * (480 / videoHeight)));
+                // objectBoundingBox.size(allowedResult.width * (640 / videoWidth), allowedResult.height * (480 / videoHeight));
 
                 // Display object center coordinates
                 // fill(0);
