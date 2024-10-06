@@ -1,4 +1,3 @@
-// Modified sketch.js
 let video;
 let serverConnection;
 let drawReady = false;

@@ -10,9 +10,7 @@ let previousY = null;
 let objectX = 0;
 let objectY = 0;
 let hueValue = 0;
-
 let scale = 1.5;
-
 let noiseOffset = 0;
 let particles = [];
 let isFinished = false; // Track if drawing is finished
@@ -55,22 +53,18 @@ function setup() {
     // WebSocket event listeners
     serverConnection.onopen = () => {
         console.log('Connected to the server');
-        brushColor = [random(100, 255), random(100, 255), random(100, 255)];
+        // brushColor = [random(100, 255), random(100, 255), random(100, 255)];
         serverConnection.send(JSON.stringify({ type: 'connection', message: 'Client connected' }));
     };
 
     serverConnection.onmessage = (event) => {
         let data = JSON.parse(event.data);
         if (data.type === 'draw') {
-            // drawShape(data.x * width, data.y * height, data.color);
-            drawParticleBrush(data.x * width, data.y * height, data.color);
+            // Replace drawShape with drawSmudgeBrush and pass all the necessary parameters
+            drawSmudgeBrush(data.x * width, data.y * height, data.color, data.step, data.totalSteps);
         }
     };
-
-    // // Add event listeners for the finish and save buttons
-    // document.getElementById('finishBtn').addEventListener('click', finishDrawing);
-    // document.getElementById('saveBtn').addEventListener('click', saveDrawing);
-
+    
 }
 
 function modelLoaded() {
@@ -134,50 +128,52 @@ function draw() {
                     brushColor = [random(100, 255), random(100, 255), random(100, 255)];
                 }
 
-                drawParticleBrush(currentX, currentY, brushColor);
+                // drawParticleBrush(currentX, currentY, brushColor);
 
                 // Ensure previous position exists before interpolation
-                // if (previousX !== null && previousY !== null) {
-                //     let steps = 5; // Number of transition steps
-                //     for (let i = 0; i <= steps; i++) {
-                //         // Interpolating the position between previous and current
-                //         let interX = lerp(previousX, currentX, i / steps);
-                //         let interY = lerp(previousY, currentY, i / steps);
+                if (previousX !== null && previousY !== null) {
+                    let steps = 5; // Number of transition steps
+                    for (let i = 0; i <= steps; i++) {
+                        // Interpolating the position between previous and current
+                        let interX = lerp(previousX, currentX, i / steps);
+                        let interY = lerp(previousY, currentY, i / steps);
+                        // Interpolating the color
+                        let interColor = [
+                            lerp(brushColor[0], random(100, 255), i / steps),
+                            lerp(brushColor[1], random(100, 255), i / steps),
+                            lerp(brushColor[2], random(100, 255), i / steps)
+                        ];
 
-                //         // Interpolating the color
-                //         let interColor = [
-                //             lerp(brushColor[0], random(100, 255), i / steps),
-                //             lerp(brushColor[1], random(100, 255), i / steps),
-                //             lerp(brushColor[2], random(100, 255), i / steps)
-                //         ];
+                        // Draw transition shape at the interpolated position with the interpolated color
+                        // drawTransitionShapeBrush(interX, interY, interColor, i, steps);
 
-                //         // Draw transition shape at the interpolated position with the interpolated color
-                //         // drawTransitionShapeBrush(interX, interY, interColor, i, steps);
+                        drawSmudgeBrush(i, interColor, i, steps);
 
-                //         // drawSmudgeBrush(interX, interY, interColor, i, steps);
+                        // drawFluidBrush(interX, interY);
 
-                //         // drawFluidBrush(interX, interY);
+                        // let [color1, color2] = generateRandomColors();
+                        // drawGradientStroke(previousX, previousY, currentX, currentY, color1, color2);
 
-                //         // let [color1, color2] = generateRandomColors();
-                //         // drawGradientStroke(previousX, previousY, currentX, currentY, color1, color2);
+                        // drawParticleBrush(interX, interY);
 
-                //         drawParticleBrush(interX, interY);
-                //     }
-                // }
+                        // Send the current drawing coordinates and color to the server
+                        if (serverConnection.readyState === WebSocket.OPEN) {
+                            serverConnection.send(JSON.stringify({
+                                type: 'draw',
+                                x: interX / width,
+                                y: interY / height,
+                                color: interColor,
+                                step: i,
+                                totalSteps: steps
+                            }));
+                        }
+                    }
+                }
 
                 // Update previous position and color
-                // previousX = currentX;
-                // previousY = currentY;
+                previousX = currentX;
+                previousY = currentY;
 
-                // Send the current drawing coordinates and color to the server
-                if (serverConnection.readyState === WebSocket.OPEN) {
-                    serverConnection.send(JSON.stringify({
-                        type: 'draw',
-                        x: objectX / width,
-                        y: objectY / height,
-                        color: brushColor
-                    }));
-                }
             }
         });
     }
