@@ -159,7 +159,8 @@ function drawShape(x, y, z) {
     // Set the thickness based on the depth (z) value
     let thickness = map(z, 0, 1, 5, 20); // Adjust the range as needed (closer = larger, farther = smaller)
 
-    noStroke();
+    stroke(0); // Ensure stroke is enabled for visibility
+    strokeWeight(2); // Set a base stroke weight for better visibility
     beginShape();
     for (let i = 0; i < 10; i++) {
         let angle = TWO_PI / 10 * i;
