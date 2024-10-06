@@ -108,7 +108,7 @@ function detectObjects() {
                 detectObjects();
             }
         } else {
-            setTimeout(detectObjects, 20);
+            setTimeout(detectObjects, 20); //连贯性-两点的间隔时间
         }
     });
 }
