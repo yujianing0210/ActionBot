@@ -1,13 +1,14 @@
 {
-  "name": "server",
+  "name": "webcam-paint-app",
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "A WebSocket app for collaborative drawing using webcam object detection",
   "dependencies": {
     "ws": "^8.18.0"
   }
