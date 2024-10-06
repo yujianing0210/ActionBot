@@ -27,4 +27,8 @@
 - Client: define my brush --> object detection --> object tracking --> a list of (x,y) coordinates
 - Server: receive coordinates in real-time and generate sketching visuals on P5.js
 
+#### Overlapping Canvas on HTML
+
+- Use CSS to style the webcam video and p5.js canvas to achieve a layering effect. The key is to make the p5.js canvas background transparent and position it on top of the webcam video.
+
 ### Let's upload our codes and progress here :)
