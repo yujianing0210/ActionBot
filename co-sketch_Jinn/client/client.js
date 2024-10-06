@@ -1,5 +1,3 @@
-// Client-Side Code for Object Detection, p5.js, and WebSocket Communication
-// Dependencies: p5.js, YOLO model for object detection
 let ws;
 let objectDetector;
 let detectedObject = '';
@@ -15,7 +13,12 @@ function setup() {
     video.size(640, 480);
     video.hide();
 
-    objectDetector = ml5.objectDetector('yolo', modelLoaded);
+    // Wait for the video to load before starting detection
+    video.elt.addEventListener('loadeddata', () => {
+        console.log('Video data loaded, starting object detection...');
+        objectDetector = ml5.objectDetector('yolo', modelLoaded); // Now safe to initialize
+    });
+
     ws = new WebSocket('ws://localhost:8081'); // Ensure this is the correct port for WebSocket
 
     ws.onopen = () => {
@@ -35,7 +38,7 @@ function setup() {
                 break;
             case 'set_color':
                 color = data.color;
-                break; s
+                break;
             case 'draw':
                 drawBall(data.x * width, data.y * height);
                 break;
@@ -49,12 +52,13 @@ function setup() {
     text("d  r  a  w  B  O  T        v.1          click to refresh ♺", 50, 40);
 }
 
-
+// Callback when YOLO model is loaded
 function modelLoaded() {
     console.log('Model Loaded!');
-    detectObject();
+    detectObject(); // Start detection after model loads
 }
 
+// Continuously detect objects in the video stream
 function detectObject() {
     objectDetector.detect(video, function (err, results) {
         if (err) {
@@ -63,7 +67,7 @@ function detectObject() {
             return;
         }
 
-        if (results && results.length > 0) { // Check if results is defined and has items
+        if (results && results.length > 0) {
             detectedObject = results[0].label;
             color = getColorFromObject(results[0]); // Assuming function to get color of object
             ws.send(JSON.stringify({ type: 'object_detected', object: detectedObject }));
@@ -75,15 +79,20 @@ function detectObject() {
     });
 }
 
+// Generate random color from detected object (placeholder logic)
+function getColorFromObject(object) {
+    return [random(255), random(255), random(255)];
+}
 
+// Function to draw a ball at specified coordinates
 function drawBall(x, y) {
     fill(color);
     noStroke();
     ellipse(x, y, dia, dia);
 }
 
+// Continuously track and send the object's (x, y) position
 function draw() {
-    // Continuously track and send the object's (x, y) position
     if (detectedObject !== '') {
         let x = random(0, 1); // Placeholder for actual object tracking x-coordinate
         let y = random(0, 1); // Placeholder for actual object tracking y-coordinate
@@ -96,6 +105,7 @@ function draw() {
     }
 }
 
+// Handle mouse click to refresh canvas
 function mouseClicked() {
     if (mouseX > 45 && mouseX < 310 && mouseY > 0 && mouseY < 55) {
         bgColor = [random(255), random(255), random(255)];
@@ -109,6 +119,7 @@ function mouseClicked() {
     }
 }
 
+// Send the normalized (x, y) position to the WebSocket server
 function sendTargetToServer() {
     if (ws && ws.readyState === WebSocket.OPEN) {
         let norm = {
@@ -116,12 +127,12 @@ function sendTargetToServer() {
             x: mouseX / width,  // Normalize the x position
             y: mouseY / height  // Normalize the y position
         };
-        let str = JSON.stringify(norm);
-        ws.send(str);
+        ws.send(JSON.stringify(norm));
         console.log("Sent position:", norm); // Log the sent position for debugging
     }
 }
 
+// Resize canvas when window is resized
 function windowResized() {
     resizeCanvas(window.windowWidth, window.windowHeight);
 }
