@@ -1,4 +1,4 @@
-# SpaceBot
+# DrawBot
 
 **SCI6365 Enactive Design 24Fall**
 
@@ -22,7 +22,7 @@
 
 - Build a web that can run GPT-3 and DALL-E in Node.js
 
-### Co-Sketching
+### DRAWBOT: Fun Co-Sketching Experience
 
 - Client: define my brush --> object detection --> object tracking --> a list of (x,y) coordinates
 - Server: receive coordinates in real-time and generate sketching visuals on P5.js
