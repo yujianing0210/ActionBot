@@ -10,7 +10,7 @@ let objectX = 0;
 let objectY = 0;
 
 // List of allowed objects to be used as a brush
-const allowedObjects = ['apple', 'banana', 'bottle', 'cup', 'pen', 'notebook', 'watch'];
+const allowedObjects = ['apple', 'peach', 'banana', 'bottle', 'cup', 'pen', 'notebook', 'watch'];
 
 function setup() {
     // Set dark background color for the browser
@@ -37,24 +37,49 @@ function setup() {
     videoBoundingBox.position((windowWidth / 4) - (video.width / 2), (windowHeight / 2) - (video.height / 2));
 
     video.elt.addEventListener('loadeddata', () => {
+        // Handle client disconnection
+        window.addEventListener('beforeunload', () => {
+            if (serverConnection.readyState === WebSocket.OPEN) {
+                serverConnection.send(JSON.stringify({ type: 'disconnection', message: 'Client disconnected' }));
+            }
+        });
         console.log('Video loaded, starting object detection');
         objectDetector = ml5.objectDetector('yolo', modelLoaded);
     });
 
     // Start the WebSocket connection to the server
-    serverConnection = new WebSocket('ws://localhost:3000');
+    // serverConnection = new WebSocket('ws://localhost:3000');
+    serverConnection = new WebSocket('ws://100.86.216.25:3000');
 
     // WebSocket event listeners
+    // serverConnection.onopen = () => {
+    //     console.log('Connected to the server');
+    //     // Send a message to the server when a client is connected
+    //     serverConnection.send(JSON.stringify({ type: 'connection', message: 'Client connected' }));
+    // };
     serverConnection.onopen = () => {
         console.log('Connected to the server');
+        // Assign a random brush color to this client
+        brushColor = [random(100, 255), random(100, 255), random(100, 255)];
+        // Send a message to the server when a client is connected
+        serverConnection.send(JSON.stringify({ type: 'connection', message: 'Client connected' }));
     };
 
+
+    // serverConnection.onmessage = (event) => {
+    //     let data = JSON.parse(event.data);
+    //     if (data.type === 'draw') {
+    //         drawBall((1 - data.x) * width, data.y * height, data.color);
+    //     }
+    // };
     serverConnection.onmessage = (event) => {
         let data = JSON.parse(event.data);
         if (data.type === 'draw') {
+            // Use consistent brush color per client, perhaps identified by an ID
             drawBall((1 - data.x) * width, data.y * height, data.color);
         }
     };
+
 }
 
 function modelLoaded() {

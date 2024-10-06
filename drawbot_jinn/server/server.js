@@ -15,12 +15,20 @@ wss.on('connection', (ws) => {
     console.log('New client connected');
 
     ws.on('message', (message) => {
-        // Broadcast received messages to all clients
-        wss.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(message);
-            }
-        });
+        const data = JSON.parse(message);
+
+        if (data.type === 'connection') {
+            console.log(data.message);
+        } else if (data.type === 'disconnection') {
+            console.log(data.message);
+        } else if (data.type === 'draw') {
+            // Broadcast received draw messages to all connected clients
+            wss.clients.forEach((client) => {
+                if (client !== ws && client.readyState === WebSocket.OPEN) {
+                    client.send(message);
+                }
+            });
+        }
     });
 
     ws.on('close', () => {
@@ -28,7 +36,11 @@ wss.on('connection', (ws) => {
     });
 });
 
+
 // Start the server
 server.listen(3000, () => {
     console.log('Server is listening on port 3000');
 });
+
+
+
