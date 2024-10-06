@@ -10,13 +10,13 @@ let previousY = null;
 let objectX = 0;
 let objectY = 0;
 let hueValue = 0;
-let depthModel;
-let thickness = 5; // Default thickness value
 
 // List of allowed objects to be used as a brush
 const allowedObjects = ['apple', 'orange', 'banana', 'carrot', 'bottle', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'mouse', 'remote', 'book', 'scissors', 'toothbrush'];
 
 function setup() {
+    // // Set dark background color for the browser
+    // document.body.style.backgroundColor = '#222';
     // Set both canvas and video to be square
     let canvasWidth = 640;
     let canvasHeight = 480;
@@ -51,24 +51,9 @@ function setup() {
     serverConnection.onmessage = (event) => {
         let data = JSON.parse(event.data);
         if (data.type === 'draw') {
-            drawShape((data.x) * width, data.y * height, data.z); // Pass `z` to adjust thickness
+            drawShape((data.x) * width, data.y * height, data.color);
         }
     };
-
-    loadDepthModel();
-}
-
-async function loadDepthModel() {
-    // Load the pre-trained MiDaS model for depth estimation
-    depthModel = await tf.loadGraphModel('https://tfhub.dev/intel/midas/v2_1_small/1/default/1', { fromTFHub: true });
-    console.log('Depth model loaded');
-}
-
-async function getDepth(videoElement) {
-    // Use the depth model to estimate depth from the video element
-    const depthTensor = await depthModel.executeAsync(videoElement);
-    const depthData = await depthTensor.data(); // Convert tensor to array data
-    return depthData; // Depth information for each pixel
 }
 
 function modelLoaded() {
@@ -105,9 +90,11 @@ function detectObjects() {
 function draw() {
     // Keep canvas background white, retain previous drawings
     if (!drawReady) background(249, 244, 249); // RGB equivalent of #d1ced9
+    // Draw the mirrored video feed
 
     if (drawReady && objectTracking) {
-        objectDetector.detect(video, async (err, results) => {
+        // Object tracking using YOLO results
+        objectDetector.detect(video, (err, results) => {
             if (err) {
                 console.error(err);
                 return;
@@ -117,40 +104,27 @@ function draw() {
             let allowedResult = results.find(result => allowedObjects.includes(result.label.toLowerCase()));
 
             if (allowedResult) {
-                // Detect depth
-                let depthMap = await getDepth(video.elt); // Get depth map for video frame
-                let objectDepth = depthMap[allowedResult.y][allowedResult.x]; // Get the depth for the detected object
-
+                // Correct the object coordinates to match the canvas scale
                 let videoWidth = video.width;
                 let videoHeight = video.height;
                 objectX = width - ((allowedResult.x + allowedResult.width / 2) * (width / videoWidth));
                 objectY = (allowedResult.y + allowedResult.height / 2) * (height / videoHeight);
-
-                // Use objectDepth (z) to control the brushstroke thickness
-                thickness = map(objectDepth, 0, 1, 1, 10); // Adjust the range as needed
-
                 if (!brushColor) brushColor = [random(100, 255), random(100, 255), random(100, 255)];
+                // Draw continuous line between previous and current positions
                 if (previousX !== null && previousY !== null) {
                     stroke(brushColor);
-                    strokeWeight(thickness);
+                    strokeWeight(4);
                     line(previousX, previousY, objectX, objectY);
                 }
                 previousX = objectX;
                 previousY = objectY;
 
-                // Display object center coordinates
-                fill(0);
-                textSize(16);
-                textAlign(CENTER, CENTER);
-                text(`(${Math.round(objectX)}, ${Math.round(objectY)})`, objectX, objectY - 15);
-
-                // Send the current drawing coordinates, color, and depth to the server
+                // Send the current drawing coordinates and color to the server
                 if (serverConnection.readyState === WebSocket.OPEN) {
                     serverConnection.send(JSON.stringify({
                         type: 'draw',
                         x: objectX / width,
                         y: objectY / height,
-                        z: objectDepth, // Send depth information
                         color: brushColor
                     }));
                 }
@@ -159,20 +133,15 @@ function draw() {
     }
 }
 
-function drawShape(x, y, z) {
+function drawShape(x, y) {
     colorMode(HSB, 360, 100, 100);
     hueValue = (hueValue + 1) % 360; // Increment hue value and keep it within the HSB range
     fill(hueValue, 100, 100);
-
-    // Set the thickness based on the depth (z) value
-    thickness = map(z, 0, 1, 5, 20); // Adjust the range as needed (closer = larger, farther = smaller)
-
-    stroke(0); // Ensure stroke is enabled for visibility
-    strokeWeight(thickness); // Use the calculated thickness
+    noStroke();
     beginShape();
     for (let i = 0; i < 10; i++) {
         let angle = TWO_PI / 10 * i;
-        let radius = thickness + sin(frameCount * 0.1 + i) * 5; // Use `thickness` as the base size
+        let radius = 10 + sin(frameCount * 0.1 + i) * 5;
         let sx = x + cos(angle) * radius;
         let sy = y + sin(angle) * radius;
         vertex(sx, sy);
