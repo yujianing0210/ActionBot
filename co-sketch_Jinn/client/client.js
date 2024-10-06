@@ -57,19 +57,24 @@ function modelLoaded() {
 
 function detectObject() {
     objectDetector.detect(video, function (err, results) {
-        if (results.length > 0) {
+        if (err) {
+            console.error("Object detection error:", err); // Log the error for debugging
+            setTimeout(detectObject, 1000); // Retry after 1 second even if there's an error
+            return;
+        }
+
+        if (results && results.length > 0) { // Check if results is defined and has items
             detectedObject = results[0].label;
             color = getColorFromObject(results[0]); // Assuming function to get color of object
             ws.send(JSON.stringify({ type: 'object_detected', object: detectedObject }));
+        } else {
+            console.log('No objects detected.');
         }
+
         setTimeout(detectObject, 1000); // Repeat detection every second
     });
 }
 
-function getColorFromObject(object) {
-    // Assume we have a way to get RGB values from the detected object
-    return [random(255), random(255), random(255)];
-}
 
 function drawBall(x, y) {
     fill(color);
