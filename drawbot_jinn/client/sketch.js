@@ -14,7 +14,7 @@ const allowedObjects = ['apple', 'peach', 'banana', 'bottle', 'cup'];
 
 function setup() {
     // Set dark background color for the browser
-    document.body.style.backgroundColor = '#222';
+    document.body.style.backgroundColor = '#333';
     // Set both canvas and video to be square
     let canvasWidth = 640;
     let canvasHeight = 480;
