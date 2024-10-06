@@ -16,15 +16,12 @@ let textureImg; // To hold texture image
 let particles = [];
 
 // List of allowed objects to be used as a brush
-// far distance
-// const allowedObjects = ['person'];
-// close distance
-const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'bottle', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'mouse', 'remote', 'book', 'scissors', 'toothbrush'];
-
+// far-distance sketch
+// const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
+// close distance sketch
+const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'cup', 'fork', 'mouse',  'scissors', 'toothbrush'];
 
 function setup() {
-    // Set dark background color for the browser
-    // document.body.style.backgroundColor = '#222';
   
     let canvasWidth = 640 * scale;
     let canvasHeight = 480 * scale;
@@ -90,7 +87,7 @@ function detectObjects() {
             if (response) {
                 drawReady = true;
                 objectTracking = true;
-                alert(`Now draw with your "${detectedObject}" with your friends`);
+                alert(`Start drawing with your friends using "${detectedObject}"!`);
             } else {
                 detectObjects();
             }
@@ -145,7 +142,7 @@ function draw() {
                         ];
 
                         // Draw transition shape at the interpolated position with the interpolated color
-                        drawTransitionShapeBrush(interX, interY, interColor, i, steps);
+                        // drawTransitionShapeBrush(interX, interY, interColor, i, steps);
 
                         // drawSmudgeBrush(interX, interY, interColor, i, steps);
 
@@ -154,9 +151,7 @@ function draw() {
                         // let [color1, color2] = generateRandomColors();
                         // drawGradientStroke(previousX, previousY, currentX, currentY, color1, color2);
 
-                        // drawTexturedBrush(interX, interY);
-
-                        // drawParticleBrush(interX, interY);
+                        drawParticleBrush(interX, interY);
                     }
                 }
 
@@ -227,16 +222,6 @@ function drawGradientStroke(x1, y1, x2, y2, color1, color2) {
     }
 }
 
-// // Texture Brush
-// function preload() {
-//     textureImg = loadImage('images/texture1.png'); // Load a texture image
-// }
-
-// function drawTexturedBrush(x, y) {
-//     // Draw textured brush
-//     image(textureImg, x - textureImg.width / 2, y - textureImg.height / 2, textureImg.width, textureImg.height);
-// }
-
 // Particle System Brush Strokes
 function Particle(x, y) {
     this.x = x;
@@ -251,7 +236,7 @@ function Particle(x, y) {
     }
 
     this.display = function() {
-        fill(0, this.alpha);
+        fill(45, this.alpha);
         noStroke();
         ellipse(this.x, this.y, this.size);
     }
