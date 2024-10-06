@@ -108,7 +108,7 @@ function detectObjects() {
                 detectObjects();
             }
         } else {
-            setTimeout(detectObjects, 100);
+            setTimeout(detectObjects, 20);
         }
     });
 }
