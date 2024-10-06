@@ -1,26 +1,22 @@
-const WebSocket = require('ws');
 const express = require('express');
 const http = require('http');
+const WebSocket = require('ws');
+const path = require('path');
 
-// Create a new express application and server
 const app = express();
 const server = http.createServer(app);
-
-// Serve static files from the public directory
-app.use(express.static('public'));
-
-// Create a WebSocket server on top of the HTTP server
 const wss = new WebSocket.Server({ server });
 
-// Array to store all connected clients
-let clients = [];
+// Serve the client HTML page
+app.use(express.static(path.join(__dirname, '../client')));
 
+// WebSocket message handler
 wss.on('connection', (ws) => {
-    clients.push(ws);
+    console.log('New client connected');
 
     ws.on('message', (message) => {
-        // Broadcast the message to all connected clients
-        clients.forEach((client) => {
+        // Broadcast received messages to all clients
+        wss.clients.forEach((client) => {
             if (client.readyState === WebSocket.OPEN) {
                 client.send(message);
             }
@@ -28,13 +24,11 @@ wss.on('connection', (ws) => {
     });
 
     ws.on('close', () => {
-        // Remove the client when disconnected
-        clients = clients.filter((client) => client !== ws);
+        console.log('Client disconnected');
     });
-
-    console.log('Client connected!');
 });
 
+// Start the server
 server.listen(3000, () => {
-    console.log('Server is listening on http://localhost:3000');
+    console.log('Server is listening on port 3000');
 });
