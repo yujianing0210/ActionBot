@@ -13,25 +13,28 @@ let objectY = 0;
 const allowedObjects = ['apple', 'banana', 'bottle', 'cup', 'pen', 'notebook', 'watch'];
 
 function setup() {
+    // Set dark background color for the browser
+    document.body.style.backgroundColor = '#222';
     // Set both canvas and video to be square
-    let canvasSize = windowWidth / 2;
-    createCanvas(canvasSize, canvasSize).position(windowWidth / 2, (windowHeight - canvasSize) / 2);
+    let canvasWidth = 640;
+    let canvasHeight = 480;
+    createCanvas(canvasWidth, canvasHeight).position((windowWidth * 3 / 4) - (canvasWidth / 2), (windowHeight / 2) - (canvasHeight / 2));
     video = createCapture(VIDEO);
-    video.size(windowWidth / 2, windowHeight);
+    video.size(640, 480);
     video.style('transform', 'scaleX(-1)');
 
-    video.position(0, 0);
+    video.position((windowWidth / 4) - (video.width / 2), (windowHeight / 2) - (video.height / 2));
 
     // Draw bounding boxes for canvas and video
     let canvasBoundingBox = createDiv();
     canvasBoundingBox.style('border', '2px solid red');
-    canvasBoundingBox.size(canvasSize, windowHeight);
-    canvasBoundingBox.position(windowWidth / 2, (windowHeight - canvasSize) / 2);
+    canvasBoundingBox.size(canvasWidth, canvasHeight);
+    canvasBoundingBox.position((windowWidth * 3 / 4) - (canvasWidth / 2), (windowHeight / 2) - (canvasHeight / 2));
 
     let videoBoundingBox = createDiv();
     videoBoundingBox.style('border', '2px solid blue');
-    videoBoundingBox.size(canvasSize, windowHeight);
-    videoBoundingBox.position(0, 0);
+    videoBoundingBox.size(video.width, video.height);
+    videoBoundingBox.position((windowWidth / 4) - (video.width / 2), (windowHeight / 2) - (video.height / 2));
 
     video.elt.addEventListener('loadeddata', () => {
         console.log('Video loaded, starting object detection');
@@ -86,13 +89,10 @@ function detectObjects() {
 }
 
 function draw() {
-    background(255);
+    // Keep canvas background white, retain previous drawings
+    if (!drawReady) background(255);
     // Draw the mirrored video feed
-    push();
-    translate(width, 0);
-    scale(-1, 1);
-    image(video, 0, 0, width, height);
-    pop();
+
     if (drawReady && objectTracking) {
         // Object tracking using YOLO results
         objectDetector.detect(video, (err, results) => {
@@ -110,20 +110,20 @@ function draw() {
                 let videoHeight = video.height;
                 objectX = width - ((allowedResult.x + allowedResult.width / 2) * (width / videoWidth));
                 objectY = (allowedResult.y + allowedResult.height / 2) * (height / videoHeight);
-                brushColor = [random(255), random(255), random(255)];
+                if (!brushColor) brushColor = [random(100, 255), random(100, 255), random(100, 255)];
                 drawBall(objectX, objectY, brushColor);
 
                 // Draw bounding box around detected object
                 let objectBoundingBox = createDiv();
                 objectBoundingBox.style('border', '2px dashed green');
-                objectBoundingBox.position(allowedResult.x * (width / videoWidth), allowedResult.y * (height / videoHeight));
-                objectBoundingBox.size(allowedResult.width * (width / videoWidth), allowedResult.height * (height / videoHeight));
+                objectBoundingBox.position((windowWidth / 4) - (video.width / 2) + (640 - (allowedResult.x + allowedResult.width)) * (640 / videoWidth), (windowHeight / 2) - (video.height / 2) + (allowedResult.y * (480 / videoHeight)));
+                objectBoundingBox.size(allowedResult.width * (640 / videoWidth), allowedResult.height * (480 / videoHeight));
 
                 // Display object center coordinates
-                fill(0);
-                textSize(16);
-                textAlign(CENTER, CENTER);
-                text(`(${Math.round(objectX)}, ${Math.round(objectY)})`, objectX, objectY - 15);
+                // fill(0);
+                // textSize(16);
+                // textAlign(CENTER, CENTER);
+                // text(`(${Math.round(objectX)}, ${Math.round(objectY)})`, objectX, objectY - 15);
 
                 // Send the current drawing coordinates and color to the server
                 if (serverConnection.readyState === WebSocket.OPEN) {
@@ -146,6 +146,7 @@ function drawBall(x, y, color) {
 }
 
 function windowResized() {
-    let canvasSize = min(windowWidth / 2, windowHeight);
-    resizeCanvas(canvasSize, canvasSize);
+    let canvasWidth = 640;
+    let canvasHeight = 480;
+    resizeCanvas(canvasWidth, canvasHeight);
 }
