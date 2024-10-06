@@ -249,13 +249,13 @@
 // }
 
 
-// Client-Side Code for Object Detection, p5.js, and WebSocket Communication
+// Revised Client-Side Code for Object Detection, p5.js, and WebSocket Communication
 // Dependencies: p5.js, YOLO model for object detection
 let ws;
 let objectDetector;
 let detectedObject = '';
 let color = [255, 255, 255];
-let dia = 5;
+let dia = 20;
 let video;
 let isDrawingStage = false;
 let objectX = 0.5;
@@ -344,11 +344,11 @@ function trackObject() {
             objectDetector.detect(video, function (err, results) {
                 if (results.length > 0) {
                     // Update the coordinates of the detected object
-                    objectX = results[0].x + results[0].width / 2;
-                    objectY = results[0].y + results[0].height / 2;
-                    // Normalize the coordinates to be between 0 and 1
-                    objectX = objectX / video.width;
-                    objectY = objectY / video.height;
+                    let objectCenterX = results[0].x + results[0].width / 2;
+                    let objectCenterY = results[0].y + results[0].height / 2;
+                    // Scale the coordinates to match canvas size
+                    objectX = objectCenterX / video.width;
+                    objectY = objectCenterY / video.height;
                 }
             });
         }
