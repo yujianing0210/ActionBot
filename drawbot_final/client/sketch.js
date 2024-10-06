@@ -36,7 +36,7 @@ function setup() {
     video.size(canvasWidth, canvasHeight);
     // video.hide(); 
     video.style('transform', 'scaleX(-1)'); // Mirror the video horizontally
-    video.position((windowWidth - canvasWidth)/ 2, (windowHeight - canvasHeight)/ 2);
+    video.position((windowWidth - canvasWidth) / 2, (windowHeight - canvasHeight) / 2);
     video.style('z-index', '-1'); // Ensure the video is behind the canvas
 
     video.elt.addEventListener('loadeddata', () => {
@@ -68,7 +68,7 @@ function setup() {
     // // Add event listeners for the finish and save buttons
     // document.getElementById('finishBtn').addEventListener('click', finishDrawing);
     // document.getElementById('saveBtn').addEventListener('click', saveDrawing);
-    
+
 }
 
 function modelLoaded() {
@@ -126,7 +126,7 @@ function draw() {
                 let videoHeight = 480;
                 let currentX = width - ((allowedResult.x + allowedResult.width / 2) * (width / videoWidth)) * scale;
                 let currentY = (allowedResult.y + allowedResult.height / 5) * (height / videoHeight) * scale;
-                
+
                 // Generate new brush color if not defined
                 if (!brushColor) {
                     brushColor = [random(100, 255), random(100, 255), random(100, 255)];
@@ -173,7 +173,7 @@ function draw() {
 function drawTransitionShapeBrush(x, y, color, step, totalSteps) {
     // Adjust shape size based on interpolation step (e.g., smaller shapes for intermediate steps)
     let size = map(step, 0, totalSteps, 10, 20); // Gradually increase size
-    fill(color); 
+    fill(color);
     noStroke();
     // Drawing an ellipse shape
     ellipse(x, y, size, size);
@@ -183,10 +183,10 @@ function drawTransitionShapeBrush(x, y, color, step, totalSteps) {
 function drawSmudgeBrush(x, y, color, step, totalSteps) {
     // Adjust shape size based on interpolation step (e.g., smaller shapes for intermediate steps)
     let size = map(step, 0, totalSteps, 10, 30); // Gradually increase size
-    
+
     // Set fill color with transparency for a watercolor effect
     fill(color[0], color[1], color[2], 150); // Adjust the alpha value for transparency
-    
+
     noStroke();
 
     // Draw multiple ellipses to create a smudge effect
@@ -202,7 +202,7 @@ function drawFluidBrush(x, y) {
     noiseOffset += 0.05; // Increment noise offset
     let fluidX = x + map(noise(noiseOffset), 0, 1, -5, 5);
     let fluidY = y + map(noise(noiseOffset + 100), 0, 1, -5, 5);
-    
+
     strokeWeight(4);
     stroke(0, 100); // Semi-transparent stroke
     point(fluidX, fluidY); // Draw point with fluid effect
@@ -214,14 +214,14 @@ function drawGradientStroke(x1, y1, x2, y2, color1, color2) {
     for (let i = 0; i <= steps; i++) {
         let interX = lerp(x1, x2, i / steps);
         let interY = lerp(y1, y2, i / steps);
-        
+
         // Interpolate colors for the gradient
         let interColor = [
             lerp(color1[0], color2[0], i / steps),
             lerp(color1[1], color2[1], i / steps),
             lerp(color1[2], color2[2], i / steps)
         ];
-        
+
         fill(interColor);
         noStroke();
         ellipse(interX, interY, 10); // Adjust size for the stroke
@@ -235,14 +235,14 @@ function Particle(x, y) {
     this.size = random(5, 15);
     this.alpha = 255;
 
-    this.update = function() {
+    this.update = function () {
         this.y += random(-1, 1); // Small random movement
         this.x += random(-1, 1);
         this.alpha -= 5; // Fade out
     }
 
-    this.display = function() {
-        fill(45, this.alpha);
+    this.display = function () {
+        fill(10, this.alpha);
         noStroke();
         ellipse(this.x, this.y, this.size);
     }
