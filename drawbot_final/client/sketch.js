@@ -11,6 +11,7 @@ let objectX = 0;
 let objectY = 0;
 let hueValue = 0;
 let depthModel;
+let thickness = 5; // Default thickness value
 
 // List of allowed objects to be used as a brush
 const allowedObjects = ['apple', 'orange', 'banana', 'carrot', 'bottle', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'mouse', 'remote', 'book', 'scissors', 'toothbrush'];
@@ -95,7 +96,7 @@ function detectObjects() {
                 detectObjects();
             }
         } else {
-            setTimeout(detectObjects, 20); //连贯性-两点的间隔时间
+            setTimeout(detectObjects, 10);
         }
     });
 }
@@ -125,12 +126,12 @@ function draw() {
                 objectY = (allowedResult.y + allowedResult.height / 2) * (height / videoHeight);
 
                 // Use objectDepth (z) to control the brushstroke thickness
-                let thickness = map(objectDepth, 0, 1, 1, 10); // Adjust the range as needed
-                strokeWeight(thickness);
+                thickness = map(objectDepth, 0, 1, 1, 10); // Adjust the range as needed
 
                 if (!brushColor) brushColor = [random(100, 255), random(100, 255), random(100, 255)];
                 if (previousX !== null && previousY !== null) {
                     stroke(brushColor);
+                    strokeWeight(thickness);
                     line(previousX, previousY, objectX, objectY);
                 }
                 previousX = objectX;
@@ -157,10 +158,10 @@ function drawShape(x, y, z) {
     fill(hueValue, 100, 100);
 
     // Set the thickness based on the depth (z) value
-    let thickness = map(z, 0, 1, 5, 20); // Adjust the range as needed (closer = larger, farther = smaller)
+    thickness = map(z, 0, 1, 5, 20); // Adjust the range as needed (closer = larger, farther = smaller)
 
     stroke(0); // Ensure stroke is enabled for visibility
-    strokeWeight(2); // Set a base stroke weight for better visibility
+    strokeWeight(thickness); // Use the calculated thickness
     beginShape();
     for (let i = 0; i < 10; i++) {
         let angle = TWO_PI / 10 * i;
