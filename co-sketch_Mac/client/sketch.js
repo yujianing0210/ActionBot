@@ -1,16 +1,13 @@
-// Revised Client-Side Code for Object Detection, p5.js, and WebSocket Communication
-// Dependencies: p5.js, YOLO model for object detection
+// Revised Client-Side Code for Face Detection using face-api.js, p5.js, and WebSocket Communication
+// Dependencies: p5.js, face-api.js
 let ws;
-let objectDetector;
-let detectedObject = '';
-let color = [255, 255, 255];
-let dia = 20;
 let video;
 let isDrawingStage = false;
 let objectX = 0.5;
 let objectY = 0.5;
+let detections = [];
 
-function setup() {
+async function setup() {
     // Create p5.js canvas
     let canvas = createCanvas(windowWidth, windowHeight);
     canvas.position(0, 0);
@@ -46,65 +43,46 @@ function setup() {
         }
     };
 
-    // Load YOLO model for object detection
-    objectDetector = ml5.objectDetector('yolo', modelLoaded);
+    // Load face-api.js models
+    await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+    await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+    await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+
+    detectFaces(); // Start detecting faces
 }
 
-function modelLoaded() {
-    console.log('Model Loaded!');
-    detectObject();
-}
+async function detectFaces() {
+    // Estimate faces in the video
+    detections = await faceapi.detectAllFaces(video.elt, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
+    if (detections.length > 0) {
+        const face = detections[0].detection.box;
+        const x = face.x;
+        const y = face.y;
+        const width = face.width;
+        const height = face.height;
 
-function detectObject() {
-    if (!isDrawingStage) {
-        objectDetector.detect(video, function (err, results) {
-            if (err) {
-                console.error('Error during object detection:', err);
-                return; // Exit the function if there's an error
+        // Draw bounding box and show coordinates
+        drawBoundingBox(x, y, width, height);  // Draw the bounding box
+        showCoordinates(x, y);  // Show the object's coordinates
+
+        if (!isDrawingStage) {
+            let confirmation = confirm("Do you want to use the detected face as your paintbrush?");
+            if (confirmation) {
+                alert('Now draw with your detected face with your friends');
+                isDrawingStage = true;
+                setTimeout(() => {
+                    alert('Now draw with your detected face with your friends');
+                }, 5000);
+                trackFace(face);  // Start tracking the face
             }
-
-            // Log the results to the console to inspect what is being detected
-            console.log(results);
-
-            // Ensure results is defined and has length before proceeding
-            if (results && results.length > 0) {
-                // Access the detected object properties
-                let detectedObject = results[0].label;
-                let x = results[0].x;
-                let y = results[0].y;
-                let width = results[0].width;
-                let height = results[0].height;
-
-                // Display bounding box and coordinates
-                drawBoundingBox(x, y, width, height);  // Draw the bounding box
-                showCoordinates(x, y);  // Show the object's coordinates
-
-                // Get color of the detected object (assuming a separate function exists)
-                color = getColorFromObject(results[0]);
-
-                let confirmation = confirm(`Do you want to use ${detectedObject} as your paintbrush?`);
-                if (confirmation) {
-                    alert('Now draw with your ' + detectedObject + ' with your friends');
-                    isDrawingStage = true;
-                    setTimeout(() => {
-                        alert('Now draw with your ' + detectedObject + ' with your friends');
-                    }, 5000);
-                    trackObject();  // Continue to track the object
-                } else {
-                    alert('Resetting... You can reselect an object as your paintbrush. Please show an object to the camera');
-                    detectObject();  // Restart the object detection process
-                }
-            } else {
-                // No objects detected, retry detection after a short delay
-                console.log('No objects detected, retrying...');
-                setTimeout(detectObject, 1000);
-            }
-        });
+        }
     }
+
+    // Call detectFaces again for continuous detection
+    setTimeout(detectFaces, 1000);  // Check for faces every second
 }
 
-
-// Function to draw a bounding box around the detected object
+// Function to draw a bounding box around the detected face
 function drawBoundingBox(x, y, width, height) {
     noFill();  // No fill for the box
     stroke(0, 255, 0);  // Green color for the bounding box
@@ -116,28 +94,18 @@ function drawBoundingBox(x, y, width, height) {
 function showCoordinates(x, y) {
     fill(255);  // White text for the coordinates
     textSize(16);  // Font size
-    text(`(${x}, ${y})`, x + 10, y + 10);  // Display the coordinates next to the top-left corner
+    text(`(${Math.round(x)}, ${Math.round(y)})`, x + 10, y + 10);  // Display the coordinates next to the top-left corner
 }
 
-
-function getColorFromObject(object) {
-    // Assume we have a way to get RGB values from the detected object
-    return [random(255), random(255), random(255)];
-}
-
-function trackObject() {
+// Function to track the face
+function trackFace(face) {
     setInterval(() => {
         if (isDrawingStage) {
-            objectDetector.detect(video, function (err, results) {
-                if (results.length > 0) {
-                    // Update the coordinates of the detected object
-                    let objectCenterX = results[0].x + results[0].width / 2;
-                    let objectCenterY = results[0].y + results[0].height / 2;
-                    // Scale the coordinates to match canvas size
-                    objectX = objectCenterX / video.width;
-                    objectY = objectCenterY / video.height;
-                }
-            });
+            const objectCenterX = face.x + face.width / 2;
+            const objectCenterY = face.y + face.height / 2;
+            // Scale the coordinates to match canvas size
+            objectX = objectCenterX / video.width;
+            objectY = objectCenterY / video.height;
         }
     }, 100); // Update object tracking every 0.1 seconds
 }
@@ -145,15 +113,15 @@ function trackObject() {
 function drawBall(x, y, color) {
     fill(color);
     noStroke();
-    ellipse(x, y, dia, dia);
+    ellipse(x, y, 20, 20); // Fixed diameter for the drawing ball
 }
 
 function draw() {
     if (isDrawingStage) {
-        // Drawing logic during the drawing stage using tracked object coordinates
+        // Drawing logic during the drawing stage using tracked face coordinates
         clear();
-        ws.send(JSON.stringify({ type: 'draw', x: objectX, y: objectY, color: color }));
-        drawBall(objectX * width, objectY * height, color);
+        ws.send(JSON.stringify({ type: 'draw', x: objectX, y: objectY, color: [255, 0, 0] })); // Example color
+        drawBall(objectX * width, objectY * height, [255, 0, 0]); // Example color
     }
 }
 
@@ -167,20 +135,6 @@ function mouseClicked() {
             let refreshMessage = JSON.stringify({ type: 'refresh', color: bgColor });
             ws.send(refreshMessage);
         }
-    }
-}
-
-function sendTargetToServer() {
-    if (ws && ws.readyState === WebSocket.OPEN) {
-        let norm = {
-            type: 'draw',
-            x: mouseX / width,  // Normalize the x position
-            y: mouseY / height, // Normalize the y position
-            color: color
-        };
-        let str = JSON.stringify(norm);
-        ws.send(str);
-        console.log("Sent position:", norm); // Log the sent position for debugging
     }
 }
 
