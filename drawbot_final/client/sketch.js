@@ -100,58 +100,6 @@ function detectObjects() {
     });
 }
 
-// function draw() {
-//     // Clear the canvas (transparent) to avoid trails
-//     // clear();
-//     // Do not clear the canvas to retain previous drawings and keep it transparent X
-
-//     // Check if we are ready to draw with object detection
-//     if (drawReady && objectTracking) {
-//         // Object tracking using YOLO results
-//         objectDetector.detect(video, (err, results) => {
-//             if (err) {
-//                 console.error(err);
-//                 return;
-//             }
-
-//             // Filter results to find an allowed object
-//             let allowedResult = results.find(result => allowedObjects.includes(result.label.toLowerCase()));
-
-//             if (allowedResult) {
-//                 // Correct the object coordinates to match the canvas scale
-//                 let videoWidth = 640;
-//                 let videoHeight = 480;
-//                 objectX = width - ((allowedResult.x + allowedResult.width / 2) * (width / videoWidth)) * scale;
-//                 objectY = (allowedResult.y + allowedResult.height / 2) * (height / videoHeight) * scale;
-                
-//                 // Give the connection line between two continous positions a random color --> UPDATE?
-//                 if (!brushColor) brushColor = [random(100, 255), random(100, 255), random(100, 255)];
-//                 // Draw the continuous line between previous and current positions
-//                 if (previousX !== null && previousY !== null) {
-//                     stroke(brushColor);
-//                     strokeWeight(4); // --> UPDATE?
-//                     line(previousX, previousY, objectX, objectY);
-//                 }
-//                 previousX = objectX;
-//                 previousY = objectY;
-
-//                 // Send the current drawing coordinates and color to the server
-//                 if (serverConnection.readyState === WebSocket.OPEN) {
-//                     serverConnection.send(JSON.stringify({
-//                         type: 'draw',
-//                         x: objectX / width,
-//                         y: objectY / height,
-//                         color: brushColor
-//                     }));
-//                 }
-//             }
-//         });
-//     }
-
-//     console.log('windowWidth:', windowWidth, 'canvas width:', width);
-
-// }
-
 function generateRandomColors() {
     let color1 = [random(255), random(255), random(255)]; // Random RGB color
     let color2 = [random(255), random(255), random(255)]; // Another random RGB color
@@ -197,7 +145,9 @@ function draw() {
                         ];
 
                         // Draw transition shape at the interpolated position with the interpolated color
-                        // drawTransitionShape(interX, interY, interColor, i, steps);
+                        drawTransitionShapeBrush(interX, interY, interColor, i, steps);
+
+                        // drawSmudgeBrush(interX, interY, interColor, i, steps);
 
                         // drawFluidBrush(interX, interY);
 
@@ -218,35 +168,25 @@ function draw() {
     }
 }
 
-
-// function drawShape(x, y) {
-//     colorMode(HSB, 360, 100, 100);
-//     hueValue = (hueValue + 1) % 360; // Increment hue value and keep it within the HSB range
-//     fill(hueValue, 100, 100);
-//     noStroke();
-//     beginShape();
-//     for (let i = 0; i < 10; i++) {
-//         let angle = TWO_PI / 10 * i;
-//         let radius = 10 + sin(frameCount * 0.1 + i) * 5;
-//         let sx = x + cos(angle) * radius;
-//         let sy = y + sin(angle) * radius;
-//         vertex(sx, sy);
-//     }
-//     endShape(CLOSE);
-// }
-
-// Watercolor-like Smudge Effect
-function drawTransitionShape(x, y, color, step, totalSteps) {
+// Ellipse
+function drawTransitionShapeBrush(x, y, color, step, totalSteps) {
     // Adjust shape size based on interpolation step (e.g., smaller shapes for intermediate steps)
     let size = map(step, 0, totalSteps, 10, 20); // Gradually increase size
+    fill(color); 
+    noStroke();
+    // Drawing an ellipse shape
+    ellipse(x, y, size, size);
+}
+
+// Watercolor-like Smudge Effect
+function drawSmudgeBrush(x, y, color, step, totalSteps) {
+    // Adjust shape size based on interpolation step (e.g., smaller shapes for intermediate steps)
+    let size = map(step, 0, totalSteps, 10, 30); // Gradually increase size
     
     // Set fill color with transparency for a watercolor effect
     fill(color[0], color[1], color[2], 150); // Adjust the alpha value for transparency
     
     noStroke();
-
-    // Example: Drawing an ellipse shape
-    // ellipse(x, y, size, size);
 
     // Draw multiple ellipses to create a smudge effect
     for (let i = -2; i <= 2; i++) { // Draw 5 ellipses in a row
