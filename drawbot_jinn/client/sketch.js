@@ -8,7 +8,6 @@ let objectDetector;
 let objectTracking = false;
 let objectX = 0;
 let objectY = 0;
-let brushSize = 10; // Add a variable for brush size
 
 // List of allowed objects to be used as a brush
 const allowedObjects = ['apple', 'peach', 'banana', 'bottle', 'cup'];
@@ -165,25 +164,10 @@ function draw() {
     }
 }
 
-// function drawBall(x, y, color) {
-//     fill(color);
-//     noStroke();
-//     ellipse(x, y, 10, 10);
-// }
-
-// Allow user to change brush size with keys
-function keyPressed() {
-    if (key === '+') {
-        brushSize = min(brushSize + 5, 50);
-    } else if (key === '-') {
-        brushSize = max(brushSize - 5, 5);
-    }
-}
-
 function drawBall(x, y, color) {
     fill(color);
     noStroke();
-    ellipse(x, y, brushSize, brushSize);
+    ellipse(x, y, 10, 10);
 }
 
 function windowResized() {
