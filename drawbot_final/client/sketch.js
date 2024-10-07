@@ -17,9 +17,9 @@ let isFinished = false; // Track if drawing is finished
 
 // List of allowed objects to be used as a brush : https://gist.github.com/AruniRC/7b3dadd004da04c80198557db5da4bda 
 // far-distance sketch
-const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
-// close distance sketch
-// const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'cup', 'fork', 'mouse',  'scissors', 'toothbrush'];
+// const allowedObjects = ['person', 'dog', 'cat', 'teddy bear'];
+// close-distance sketch
+const allowedObjects = ['bottle', 'apple', 'orange', 'banana', 'carrot', 'cup', 'fork', 'mouse', 'scissors'];
 
 function setup() {
     let canvasWidth = 640 * scale;
@@ -62,6 +62,7 @@ function setup() {
         if (data.type === 'draw') {
             // Replace drawShape with drawSmudgeBrush and pass all the necessary parameters
             drawSmudgeBrush(data.x * width, data.y * height, data.color, data.step, data.totalSteps);
+            // drawParticleBrush(data.x * width, data.y * height, data.color);
         }
     };
     
@@ -125,7 +126,7 @@ function draw() {
                 
                 // Generate new brush color if not defined
                 if (!brushColor) {
-                    brushColor = [random(100, 255), random(100, 255), random(100, 255)];
+                    brushColor = [0, 0, 0];
                 }
 
                 // drawParticleBrush(currentX, currentY, brushColor);
@@ -144,10 +145,13 @@ function draw() {
                             lerp(brushColor[2], random(100, 255), i / steps)
                         ];
 
+                        // Below are different brushes that we can use:
+                        
                         // Draw transition shape at the interpolated position with the interpolated color
                         // drawTransitionShapeBrush(interX, interY, interColor, i, steps);
 
                         drawSmudgeBrush(i, interColor, i, steps);
+                        // drawParticleBrush(interX, interX, brushColor);
 
                         // drawFluidBrush(interX, interY);
 
